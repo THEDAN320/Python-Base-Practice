@@ -76,9 +76,41 @@ type UserData = dict[str, DataField]
 
 <br>
 
+# Докстринги (docstrings)
+
+**Докстринги** - это специальные комментарии в коде, по которым ide создает подсказки. Прописываются они в начале функций, классов, методов и модулей.
+
+Выглядят они так:
+
+<image src="images/7.png">
+
+Вот так выглядят подсказки в vs code:
+
+<image src="images/8.png">
+
+Вот [хорошая статья](https://realpython.com/documenting-python-code/#docstring-formats) по докстрингам и разным стилям их написания.
+
+# Автодокументирование (Sphinx)
+
+В экосистеме питона есть инструмент для автоматического создания документации (как gcov_report для C), называется он sphinx.
+
+Базовый вариант документация выглядит примерно так:
+
+<image src="images/9.jpg">
+
+Есть и второй вариант внешнего вида:
+
+<image src="images/10.jpg">
+
+<br>
+
+[Документация sphinx](https://www.sphinx-doc.org/en/master/usage/installation.html).
+
+[Статья](https://habr.com/ru/companies/netologyru/articles/815563/) с понятным объяснением по настройке.
+
 # Линтеры
 
-Что такое линтер? ***Линтер*** - это всего лишь программа, которая проверяет твой код. Люди, использующие vs code наверняка знакомы с Pylance. Он проверяет синтаксис во время разработки, чтобы сразу указать на все ошибки. Но зачастую, его одного бывает недостаточно. Я выделю три самых главных линтера по-моему мнению.
+Что такое линтер? **Линтер** - это всего лишь программа, которая проверяет твой код. Люди, использующие vs code наверняка знакомы с Pylance. Он проверяет синтаксис во время разработки, чтобы сразу указать на все ошибки. Но зачастую, его одного бывает недостаточно. Я выделю три самых главных линтера по-моему мнению.
 
 > Для их использования вам нужно будет установить соответствующий линтер через pip. <br>
 > После установить плагин/расширение в вашей ide.
@@ -91,8 +123,6 @@ type UserData = dict[str, DataField]
 - [**cognitive-complexity**](https://pypi.org/project/flake8-cognitive-complexity/). Проверяет код на слишком большую вложенность.
 - [**eradicate**](https://pypi.org/project/flake8-eradicate/). Проверяет код на отстутсвие закомменченных кусков ненужного кода.
 
-<br>
-
 Сам [flake8](https://pypi.org/project/flake8/)
 
 ## mypy
@@ -104,8 +134,6 @@ type UserData = dict[str, DataField]
 
 <image src="images/5.png">
 <image src="images/4.png">
-
-<br>
 
 К сожалению, на рантайм это никак не влияет и вам все равно могут прилететь другие типы. Внимательно следите за этим и расставляйте тайпхинты, чтобы предотвратить это на этапе разработки.
 
@@ -126,7 +154,7 @@ type UserData = dict[str, DataField]
 * [mypy](https://pypi.org/project/mypy/)
 * [isort](https://pypi.org/project/isort/)
 
-</b>
+<br>
 
 # форматтеры
 Форматтер - это программа, которая сама редактирует код для соответствия стилям. Самый популярный форматтер сейчас это [black](https://pypi.org/project/black/)
@@ -141,6 +169,140 @@ type UserData = dict[str, DataField]
 
 Например, через https://github.com/pre-commit/pre-commit-hooks можно настроить:
 * Удаление лишних пробелов в коде
-* Добавления символа переноса на новую строку в конце всех файло
-* проверку корректности yaml, json файлов
-* 
+* Добавления символа переноса на новую строку в конце всех файлов
+* Проверку корректности yaml, json файлов
+* Проверка на отсутствие конфиденциальных данных в коде
+
+И еще множество всего.
+
+Также, хуки для пре-коммита имеют и линтеры с black:
+* [flake8](https://github.com/PyCQA/flake8)
+* [isort](https://github.com/PyCQA/isort)
+* [mypy](https://github.com/pre-commit/mirrors-mypy)
+* [black](https://github.com/psf/black)
+
+С помощью них мы можем сделать форматирование кода и затем проверить через все линтеры перед отправкой на удаленный репозиторий. Выглядит это примерно так:
+<image src="images/6.png">
+
+# Pydantic
+
+Представьте, у вас есть класс для данных пользователя:
+
+```python
+class User:
+    """User class."""
+
+    def __init__(self, tg_id: int) -> None:
+        """User init.
+
+        :param tg_id: user id from telegram.
+        """
+        self.tg_id = tg_id
+```
+
+И во избежания ошибок вы хотите уже на этом моменте убедиться что tg_id это числовой тип. Для этого можно воспользоваться встроенной функцией isinstance:
+
+```python
+class User:
+    """User class."""
+
+    def __init__(self, tg_id: int) -> None:
+        """User init.
+
+        :param tg_id: user id from telegram.
+        """
+        if isinstance(tg_id, int):
+            self.tg_id = tg_id
+        else:
+            raise ValueError(
+                "type for tg_id is incorrect! Excpected int."
+            )
+
+```
+
+И это нормальное решение. Однако, в реальном классе может передаваться гораздо больше параметров, под которые придеться писать свои проверки. Тут нам поможет библиотека [Pydantic](https://pypi.org/project/pydantic/). Она позволяет создавать классы с автоматической валидацией типов. Работает она при помощи тайп хинтов. Вот как с ней выглядел бы наш класс:
+
+```python
+from pydantic import BaseModel
+
+
+class User(BaseModel):
+    """User class.
+
+    :param tg_id: user id from telegram."""
+
+    tg_id: int
+
+
+user = User(123)
+```
+Это выглядит гораздо менее громоздко. При этом конструктор для класса Pydantic cоздаст сам, на основе наших параметров.
+
+Докстринги для конструктора в таком случае прописываем в докстринге класса.
+
+Если мы попытаемся создать объект с неккоректным типом, например `User(tg_id=1.23)`, то получим ошибку:
+
+```bash
+pydantic_core._pydantic_core.ValidationError: 1 validation error for User
+tg_id
+  Input should be a valid integer, got a number with a fractional part [type=int_from_float, input_value=1.23, input_type=float]
+    For further information visit https://errors.pydantic.dev/2.7/v/int_from_float
+```
+
+И тут есть важный момент. Pydantic всегда сначала пытается привести тип к нужному и только потом если у него это не получилось выбрасывает ошибку. Например, если мы попытаемся создать юзера так:
+
+```python
+user = User("123")
+```
+
+То никакой ошибки не будет, наша строка преобразуется в число. Для того чтобы строго проверять типы, в pydantic есть специальные типы:
+
+```python
+from pydantic import BaseModel, StrictInt
+
+
+class User(BaseModel):
+    """User class.
+
+    :param tg_id: user id from telegram."""
+
+    tg_id: StrictInt
+```
+
+Также, в pydantic имеется возможность добавлять проверки на сами значения. Для этого этого есть специальная сущность `Field`:
+
+```python
+from typing import Annotated
+
+from pydantic import BaseModel, Field, StrictInt
+
+
+class User(BaseModel):
+    """User class.
+
+    :param tg_id: user id from telegram."""
+
+    tg_id: Annotated[StrictInt, Field(gt=10)]
+```
+
+**Annotated** - это тип, который содержит другой тип вместе с метаданными. Здесь у нас в качестве типа `StrictInt`, в качестве метаданных `Field`.
+
+Параметр gt (greater than) позволяет нам указать минимальное значение для нашего числа. Если мы передадим 9, получим следующую ошибку:
+
+```bash
+self.__pydantic_validator__.validate_python(data, self_instance=self)
+pydantic_core._pydantic_core.ValidationError: 1 validation error for User
+tg_id
+  Input should be greater than 10 [type=greater_than, input_value=9, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.7/v/greater_than
+```
+
+Такие проверки можно настроить для любых типов данных. вот список всех параметров что можно настроить:
+
+<image src="images/11.png">
+
+<br>
+
+Полная [документация Pydantic](https://docs.pydantic.dev/latest/)
+
+# Конфиги и приватные данные
