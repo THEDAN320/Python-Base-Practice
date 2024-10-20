@@ -1,0 +1,105 @@
+[tool.poetry]
+name = ""
+version = "0.1.0"
+description = ""
+authors = [""]
+readme = "README.md"
+
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[tool.poetry.group.dev.dependencies]
+vulture = "^2.13"
+flake8 = "^7.1.1"
+flake8-pyproject = "^1.2.3"
+flake8-blind-except = "^0.2.1"
+flake8-bugbear = "^24.8.19"
+flake8-builtins = "^2.5.0"
+flake8-cognitive-complexity = "^0.1.0"
+flake8-comprehensions = "^3.15.0"
+flake8-docstrings = "^1.7.0"
+flake8-eradicate = "^1.5.0"
+flake8-mutable = "^1.2.0"
+flake8-polyfill = "^1.0.2"
+flake8-print = "^5.0.0"
+mypy = "^1.12.0"
+isort = "^5.13.2"
+black = "^24.10.0"
+pre-commit = "^4.0.1"
+
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.3.3"
+pytest-asyncio = "^0.24.0"
+pytest-repeat = "^0.9.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.flake8]
+count=true
+statistics=true
+show-source=true
+max-line-length = 79
+exclude = [".venv"]
+docstring-convention = "pep257"
+ignore = [
+    # A002 argument "object" is shadowing a python builtin
+    "A002",
+    # A003 class attribute "id" is shadowing a python builtin
+    "A003",
+    # A005 A module is shadowing a Python builtin module
+    "A005",
+    # D100 Missing docstring in public module
+    "D100",
+    # D101 Missing docstring in public class
+    "D101",
+    # D102 Missing docstring in public method
+    "D102",
+    # D103 Missing docstring in public function
+    "D103",
+    # D104 Missing docstring in public package
+    "D104",
+    # D105 Missing docstring in magic method
+    "D105",
+    # D107 Missing docstring in __init__
+    "D107",
+    # W504 line break after binary operator
+    "W504"
+]
+max-cognitive-complexity = 10
+max-complexity = 10
+per-file-ignores = [
+    "tests/**:D1,E800,A003",
+    "**/__init__.py:F401"
+]
+
+
+[tool.mypy]
+ignore_missing_imports = true
+disable_error_code = [
+    "import-untyped",
+    "import-not-found"
+]
+
+
+[tool.isort]
+profile = "black"
+line_length = 79
+lines_after_imports = 2
+multi_line_output = 3
+include_trailing_comma = true
+use_parentheses = true
+ensure_newline_before_comments = true
+
+
+[tool.black]
+line-length = 79
+target-version = ['py311']
+include = '\.pyi?$'
+skip_magic_trailing_comma = false
