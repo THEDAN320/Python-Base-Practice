@@ -92,6 +92,10 @@ DataField = TypeVar("UserFields", Username, UserAge)
 type UserData = dict[str, DataField]
 ```
 
+> Синтаксис с type появился только в версии питона 3.12.<br>
+> В более старых версиях можно использовать TypeAlias из typing:<br>
+> `Username: TypeAlias = Optional[str]`
+
 <br>
 
 Подробнее про тайпхинты можете прочитать [тут](https://habr.com/ru/companies/lamoda/articles/432656/)
